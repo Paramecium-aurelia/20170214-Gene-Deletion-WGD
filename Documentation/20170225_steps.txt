@@ -1,0 +1,13 @@
+here are the commands for the pipeline so far:
+
+1. First install BLAST+
+2. Make local database
+Makeblastdb can be invoked for this file as below.
+
+$ makeblastdb -in mydb.fsa -parse_seqids -dbtype nucl
+===> makeblastdb -in biaurelia_V1-4_assembly_v1.fa -parse_seqids -dbtype nucl
+Note: the fastafile must be in the directory where you want your db to be
+
+3. Querrying genes against scaffolds database
+===> blastn -query ../genedb/genes_spliced.fa -subject biaurelia_V1-4_assembly_v1.fa -dust no -outf\
+mt "6 qseqid sseqid btop evalue qstart qend sstart send"
