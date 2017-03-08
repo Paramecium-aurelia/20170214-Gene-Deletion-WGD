@@ -25,3 +25,10 @@ qqScript --pipeline:
 	then, visualization:
 	1)    circos
 	2)    synteny plot (apparently this is not easy) for a pair of contigs that look nice
+###############################################################################################
+
+A few clarification about the script test.py 
+*1. Generate blastoutput
+blastp -query pbi.cds.translated.fa -subject pbi.cds.translated.fa -dust no -outfmt "6 qseqid sseqid pident qlen slen qstart qend sstart send evalue btop" > blastoutput
+*2. Running test .py on coomand line 
+python test.py annotation.gff3 blastoutput 
