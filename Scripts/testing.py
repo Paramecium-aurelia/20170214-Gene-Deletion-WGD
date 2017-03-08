@@ -20,7 +20,7 @@ def readpsl(pslout,pbidict):
     with open(pslout,'r') as file:
         for line in file:
             line=line.rstrip().split()
-            ## Here are the filtering conditions: pident has to be than 50% and the maximum common subsequence overlap of  the querry and subject >=40%
+            ## Here are the filtering conditions: pident has to be than 50% and the maximum common subsequence overlap of the querry and subject >=40%
             ## These criteria could be tuned and changed as desired
             if float(line[2])>50.0 and max([ int(i) for i in re.split(r'(\d+)',line[-1]) if len(i)>0 and i.isdigit()])/float(line[3])>=0.40:
                 if line[0]!=line[1]:
