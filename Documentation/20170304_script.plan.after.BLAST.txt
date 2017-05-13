@@ -1,0 +1,34 @@
+qqScript --pipeline:
+------------------
+1. From the gff3 file
+ - get scaffolds and protein IDs
+ - create Protiens dictionaries : key=Protein, value=scaffold
+2. Update the psl output:
+   - we add column containing scaffold for each protein : by calling the value corresponding to the key [protein id]
+   - we add column containing the length of the protein (query protein) by : checking whether col2 ==col1 if TRUE keep col3.
+   - we add another column with the percentage coverage of query protein:
+     	-- split the btop string then get the numbers of contiguous exact matches
+	-- divided each by the total length of the protein (query)
+	--- keep the max value 
+ 	--- ADD max/qlen as last column
+3. 	-- parse stt all riteria met
+	-- h=choose only best hit for each protein (based on e-vakue)
+	for each line:
+	    make a tuple  o=f the two protein (q and s)
+	    if reverse(tuple) in set:
+	       write lines corresponding to each element of the tuple to a file; and delete reverse(tuple) from the set
+	    else:
+		add the tuple to myset
+	at the end, write the lines corresponding to the first element of each tuple still remaining in the set to a different file (for hits which were not reciprocal)
+
+
+	then, visualization:
+	1)    circos
+	2)    synteny plot (apparently this is not easy) for a pair of contigs that look nice
+###############################################################################################
+
+A few clarification about the script test.py 
+*1. Generate blastoutput
+blastp -query pbi.cds.translated.fa -subject pbi.cds.translated.fa -dust no -outfmt "6 qseqid sseqid pident qlen slen qstart qend sstart send evalue btop" > blastoutput
+*2. Running test .py on coomand line 
+python test.py annotation.gff3 blastoutput 
