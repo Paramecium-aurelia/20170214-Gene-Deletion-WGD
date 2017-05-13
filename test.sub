@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -k o
+#PBS -l nodes=1:ppn=8,walltime=72:00:00,vmem=25gb
+#PBS -m abe
+#PBS -N WGDgdr2
+#PBS -j oe
+
+#cd /N/dc2/scratch/enzabaru/Testing/
+#cd /N/dc2/scratch/enzabaru/Testing/scripts/
+cd /N/dc2/scratch/enzabaru/Testing/scripts/Pipe/
+module load python
+#python 20170425.py ../biaurelia_V1-4_annotation_v1.gff3 ../outputs/enrichedOutput.txt > biaurelia_hits.txt 
+#python eastertest.py biaurelia_V1-4_annotation_v1.gff3 enrichedOutput.txt > AllCases_Easter_pairs.txt 
+python pipe10.py pbi.cds.translated.fa biaurelia_V1-4_annotation_v1.gff3 enriched_pslout ../biaurelia_paralogons.tree 
+python 20170513compareResults.py ../biaurelia_paralogons.tree bi_bothits > Resulsts_05_13.txt 
+ 
