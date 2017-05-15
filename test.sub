@@ -12,5 +12,5 @@ module load python
 #python 20170425.py ../biaurelia_V1-4_annotation_v1.gff3 ../outputs/enrichedOutput.txt > biaurelia_hits.txt 
 #python eastertest.py biaurelia_V1-4_annotation_v1.gff3 enrichedOutput.txt > AllCases_Easter_pairs.txt 
 python pipe10.py pbi.cds.translated.fa biaurelia_V1-4_annotation_v1.gff3 enriched_pslout ../biaurelia_paralogons.tree 
-python 20170513compareResults.py ../biaurelia_paralogons.tree bi_bothits > Resulsts_05_13.txt 
+python 20170513compareResults.py ../biaurelia_paralogons.tree bi_bothits > Results_05_13.txt 
  
