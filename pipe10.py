@@ -72,7 +72,7 @@ def findCandidates(rbsssh):
     candidates={}
     for p1 in rbsssh.keys():
         minval=min([float(rbsssh[p1][p2][1]) for p2 in rbsssh[p1].keys()])
-        uplimit=float(minval*10**10)
+        uplimit=float(minval*10**15)
         check=0
         for p2 in rbsssh[p1].keys():
             if float(rbsssh[p1][p2][1])<=uplimit:
@@ -131,7 +131,7 @@ def getSSS(en_pslout,pbidict):
         for k2 in sca_List_sca[k1].keys():
             score1=0
             score2=0
-            try: ## award those scaffolds do hit back to each other, and penalize those which do not,penality=100
+            try: ## award those scaffolds that do hit back to each other, and penalize those that do not,penality=100
                 score1=sca_List_sca[k1][k2]
             except:
                 score1=100
