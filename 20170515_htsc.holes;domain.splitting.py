@@ -23,7 +23,7 @@ def getdup1(lst):
         else:
             print 'dup:', k, '-->', ' '.join(d[k])
     #return pdup(d)
-def domainsplit-tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit by multiple other proteins when we compare pairs
+def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit by multiple other proteins when we compare pairs
 #of scaffolds, we infer that there is a tandem duplication, or a domain splitting of one large protein, and choose a single
 #best mate to form the ohnologan
     bestmultL=[]
@@ -31,7 +31,6 @@ def domainsplit-tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
     casesL=[]
     for htsc in htscList:
         doubles0=[]; doubles1=[]; mult={}
-        doublesD={}
         for tup in htsc:
             if tup[0] not in doubles0:
                 doubles0+=[tup[0]]
@@ -90,7 +89,7 @@ def domainsplit-tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
                 #delete the tuple from htsc---it was a tandem duplication or a split domain, so that isn't an ohnolog
                 #if we need to know which was the case, we also have a list somewhere saying that (t[0], t[1], t[2]) was one of those cases
                                     #where t[0] is 1 protein,t[1] is the set of other proteins in the gff that it hits, and t[2] is a string indicated which case
-def remove_ds-td_extras(htscList, nsbmL):#see comments above
+def remove_ds_td_extras(htscList, nsbmL):#see comments above
     singly=htscList.copy()
     for htsc in singly:
         doubles0=[]; doubles1=[]; mult={}
@@ -124,6 +123,7 @@ def fillht(htscList, en_pslout_file):#infer synteny if hits between pairs of sca
     l2hL=[]
     l2thhL=[]
     twohitsholesList=[]
+    hole1way=[]
     for htsc in htscList:
         if len(htsc)>2:
             for i in range(1,len(htsc)-1):
@@ -152,18 +152,14 @@ def fillht(htscList, en_pslout_file):#infer synteny if hits between pairs of sca
                                     if getInt(line[0]) in mycol and getInt(line[2]) in mycol and line[1]!=line[3]:
                                         dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
                             dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
-                            allowed=set()
-                            kill-it=[]
+                            allowed=set()#this code makes sure that we don't keep duplicates of a reciprocal hit
+                            kill_it=[]
                             for tup in dummy_s:
-                                for index,p in enumerate(tup):
-                                    if index < 2 and p not in allowed:
-                                        allowed.add(p)
-                                    elif index < 2 and p in allowed:
-                                        kill-it.append(tup)
-                                        continue
-                                    elif index >= 2:
-                                        continue
-                            for tupk in kill-it:
+                                if tup[0] not in allowed and tup[1] not in allowed:
+                                    allowed.add(tup[0]);allowed.add(tup[1])
+                                else:
+                                    kill_it.append(tup)
+                            for tupk in kill_it:
                                 dummy_s.remove(tupk)
                             dummy_top=dummy_s[0:(min(len(indivcol1),len(indivcol2))+1)].
                             length2=[]
@@ -185,17 +181,13 @@ def fillht(htscList, en_pslout_file):#infer synteny if hits between pairs of sca
                                         dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
                             dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
                             allowed=set()
-                            kill-it=[]
+                            kill_it=[]
                             for tup in dummy_s:
-                                for index,p in enumerate(tup):
-                                    if index < 2 and p not in allowed:
-                                        allowed.add(p)
-                                    elif index < 2 and p in allowed:
-                                        kill-it.append(tup)
-                                        continue
-                                    elif index >= 2:
-                                        continue
-                            for tupk in kill-it:
+                                if tup[0] not in allowed and tup[1] not in allowed:
+                                    allowed.add(tup[0]);allowed.add(tup[1])
+                                else:
+                                    kill_it.append(tup)
+                            for tupk in kill_it:
                                 dummy_s.remove(tupk)
                             dummy_top=dummy_s[0:(min(len(indivcol1),len(indivcol2))+1)].
                             length2=[]
@@ -220,17 +212,13 @@ def fillht(htscList, en_pslout_file):#infer synteny if hits between pairs of sca
                                         dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
                             dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
                             allowed=set()
-                            kill-it=[]
+                            kill_it=[]
                             for tup in dummy_s:
-                                for index,p in enumerate(tup):
-                                    if index < 2 and p not in allowed:
-                                        allowed.add(p)
-                                    elif index < 2 and p in allowed:
-                                        kill-it.append(tup)
-                                        continue
-                                    elif index >= 2:
-                                        continue
-                            for tupk in kill-it:
+                                if tup[0] not in allowed and tup[1] not in allowed:
+                                    allowed.add(tup[0]);allowed.add(tup[1])
+                                else:
+                                    kill_it.append(tup)
+                            for tupk in kill_it:
                                 dummy_s.remove(tupk)
                             dummy_top=dummy_s[0:(min(len(indivcol1),len(indivcol2))+1)].
                             length2=[]
@@ -252,17 +240,13 @@ def fillht(htscList, en_pslout_file):#infer synteny if hits between pairs of sca
                                         dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
                             dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
                             allowed=set()
-                            kill-it=[]
+                            kill_it=[]
                             for tup in dummy_s:
-                                for index,p in enumerate(tup):
-                                    if index < 2 and p not in allowed:
-                                        allowed.add(p)
-                                    elif index < 2 and p in allowed:
-                                        kill-it.append(tup)
-                                        continue
-                                    elif index >= 2:
-                                        continue
-                            for tupk in kill-it:
+                                if tup[0] not in allowed and tup[1] not in allowed:
+                                    allowed.add(tup[0]);allowed.add(tup[1])
+                                else:
+                                    kill_it.append(tup)
+                            for tupk in kill_it:
                                 dummy_s.remove(tupk)
                             dummy_top=dummy_s[0:(min(len(indivcol1),len(indivcol2))+1)].
                             length2=[]
@@ -548,5 +532,5 @@ def readgff(f):
             pbi[re.split(r'[=;\s]',line[8])[1]]=line[0]
     return pbi 
  
-if __name__ == '__main__':
+#if __name__ == '__main__':
      ProcessCLI(sys.argv)
