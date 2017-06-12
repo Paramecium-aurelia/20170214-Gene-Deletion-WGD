@@ -13,7 +13,10 @@ def ProcessCLI(args):
             #print s1,s2, len(htscd[s1][s2])
             LL+=[htscd[s1][s2]]
         htsc+=[LL]
-        print LL 
+        #print LL
+        fillht(htsc,args[2],pbi)
+        return 
+         
 
  #   bestHits= readpsl(args[2],scaf_pb)
     #for k in bestHits:
@@ -126,156 +129,158 @@ def remove_ds_td_extras(htscList, nsbmL):#see comments above
                         htsc.remove(tup)
     return singly
     
-def fillht(htscL, en_pslout_file):#infer synteny if hits between pairs of scaffolds are uniformly decreasing
+def fillht(htscL, en_pslout_file,pbi):#infer synteny if hits between pairs of scaffolds are uniformly decreasing
 #or uniformly increasing; if there are gaps in the synteny find appropriate hits that fill the holes and mark the pairs as
 #ohnologans
     '''now Roy must make copy of htscL and add the filled holes directly to it'''
     holesList=[];l2hL=[];l2thhL=[];twohitsholesList=[]
     hole1way=[]
-    newhtscList=htscL.copy()
-    for htsc in htscList:
-        newhits=set()
-        if len(htsc)>2:
-            for i in range(1,len(htsc)-1):
-                if getInt(htsc[i-1][0])< getInt(htsc[i][0]) and getInt(htsc[i][0])< getInt(htsc[i+1][0]):
-                    if getInt(htsc[i-1][1])< getInt(htsc[i][1]) and getInt(htsc[i][1])< getInt(htsc[i+1][1]):
-                        if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])<(getInt(htsc[i][1])-1):#if there is a hole on BOTH scafs
-        #there was a gap on the scaffold. now we want to fill it in.
-                            '''if getInt(htsc[i-1][0])-(getInt(htsc[i][0])-1) == getInt(htsc[i-1][1])-getInt(htsc[i][1]):
-        #if the gaps are the same length on both scaffolds, we try to fill in the holes one at a time
-                                for index,protein_int in enumerate(range((getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))):
+    newhtscList=[q for q in htscL]
+    for LT in newhtscList:
+        for htsc in LT:
+            newhits=set()
+            if len(htsc)>2:
+                print htsc[0]
+                return 
+                for i in range(1,len(htsc)-1):
+                    if getInt(htsc[i-1][0])< getInt(htsc[i][0]) and getInt(htsc[i][0])< getInt(htsc[i+1][0]):
+                        if getInt(htsc[i-1][1])< getInt(htsc[i][1]) and getInt(htsc[i][1])< getInt(htsc[i+1][1]):
+                            if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])<(getInt(htsc[i][1])-1):#if there is a hole on BOTH scafs
+            #there was a gap on the scaffold. now we want to fill it in.
+                                '''if getInt(htsc[i-1][0])-(getInt(htsc[i][0])-1) == getInt(htsc[i-1][1])-getInt(htsc[i][1]):
+            #if the gaps are the same length on both scaffolds, we try to fill in the holes one at a time
+                                    for index,protein_int in enumerate(range((getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))):
+                                        for line in en_pslout:
+                                            line=line.rstrip().split()
+                                            if (getInt(line[0]==protein_int) and getInt(line[2])==(getInt(htsc[i-1][1])+(index+1))\#if the pair exists at all in the
+                                            or getInt(line[2]==protein_int) and getInt(line[0])==(getInt(htsc[i-1][1])+(index+1))):#enriched psl output
+                                                ##ADD THAT PAIR TO THE LIST OF OHNOLOGANS
+                                                ##BUT IT DON'T KNOW WHAT THAT LIST IS CALLED---HELP ME, ETIENNE
+                                elif getInt(htsc[i-1][0])-(getInt(htsc[i][0])-1) != getInt(htsc[i-1][1])-getInt(htsc[i][1]):'''
+                                indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
+                                indivcol2=set(range(getInt(htsc[i-1][1])+1),getInt(htsc[i][1]))
+                                mycol=indivcol1.union(indivcol2)
+                                
+                                dummy=[]
+                                with open(en_pslout_file,'r') as en_pslout:
+                                    for line in en_pslout:
+                                        line=line.rstrp().split()
+                                        if getInt(line[0]) in mycol and getInt(line[1]) in mycol and pbi[line[0]]!=pbi[line[1]]:
+                                            dummy.append((line[0],line[1],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
+                                dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
+                                allowed=set()#this code makes sure that we don't keep duplicates of a reciprocal hit
+                                kill_it=[]
+                                for tup in dummy_s:
+                                    if tup[0] not in allowed or tup[1] not in allowed:
+                                        allowed.add(tup[0]);allowed.add(tup[1])
+                                    else:
+                                        kill_it.append(tup)
+                                for tupk in kill_it:
+                                    dummy_s.remove(tupk)
+                                #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
+                                length2=[(trip[0],trip[1]) for trip in dummy_s]
+                                '''for trip in dummy_top:
+                                    length2.append((trip[0],trip[1]))'''
+                                l2hL+=[length2]
+                                newhits.add(length2)
+                                holesList+=[dummy_top]
+                        
+                        elif getInt(htsc[i-1][1])> getInt(htsc[i][1]) and getInt(htsc[i][1])> getInt(htsc[i+1][1]):#case: scafs in reverse order
+                            if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])>(getInt(htsc[i][1])+1):#if there is a hole on BOTH scafs
+                                indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
+                                indivcol2=set(range(getInt(htsc[i-1][1])-1),getInt(htsc[i][1]),-1)
+                                mycol=indivcol1.union(indivcol2)
+                                dummy=[]
+                                with open(en_pslout_file,'r') as en_pslout:
+                                    for line in en_pslout:
+    
+                                        if getInt(line[0]) in mycol and getInt(line[1]) in mycol and pbi[line[0]]!=pbi[line[1]]:
+                                            dummy.append((line[0],line[1],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
+                                dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
+                                allowed=set()
+                                kill_it=[]
+                                for tup in dummy_s:
+                                    if tup[0] not in allowed or tup[1] not in allowed:
+                                        allowed.add(tup[0]);allowed.add(tup[1])
+                                    else:
+                                        kill_it.append(tup)
+                                for tupk in kill_it:
+                                    dummy_s.remove(tupk)
+                                #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
+                                length2=[(trip[0],trip[1]) for trip in dummy_s]
+                                '''for trip in dummy_top:
+                                    length2.append((trip[0],trip[1]))'''
+                                l2hL+=[length2]
+                                newhits.add(length2)
+                                holesList+=[dummy_top]
+                                
+            elif len(htsc)==2:
+                for i in range(1,2):
+                    if getInt(htsc[i-1][0])< getInt(htsc[i][0]):
+                        if getInt(htsc[i-1][1])< getInt(htsc[i][1]):
+                            if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])<(getInt(htsc[i][1])-1):#if there is a hole on BOTH scafs
+            #there was a gap on the scaffold. now we want to fill it in.
+                                indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
+                                indivcol2=set(range(getInt(htsc[i-1][1])+1),getInt(htsc[i][1]))
+                                mycol=indivcol1.union(indivcol2)
+                                
+                                dummy=[]
+                                with open(en_pslout_file,'r') as en_pslout:
                                     for line in en_pslout:
                                         line=line.rstrip().split()
-                                        if (getInt(line[0]==protein_int) and getInt(line[2])==(getInt(htsc[i-1][1])+(index+1))\#if the pair exists at all in the
-                                        or getInt(line[2]==protein_int) and getInt(line[0])==(getInt(htsc[i-1][1])+(index+1))):#enriched psl output
-                                            ##ADD THAT PAIR TO THE LIST OF OHNOLOGANS
-                                            ##BUT IT DON'T KNOW WHAT THAT LIST IS CALLED---HELP ME, ETIENNE
-                            elif getInt(htsc[i-1][0])-(getInt(htsc[i][0])-1) != getInt(htsc[i-1][1])-getInt(htsc[i][1]):'''
-                            indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
-                            indivcol2=set(range(getInt(htsc[i-1][1])+1),getInt(htsc[i][1]))
-                            mycol=indivcol1.union(indivcol2)
-                            
-                            dummy=[]
-                            with open(en_pslout_file,'r') as en_pslout:
-                                for line in en_pslout:
-                                    line=line.rstrip().split()
-                                    if getInt(line[0]) in mycol and getInt(line[2]) in mycol and line[1]!=line[3]:
-                                        dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
-                            dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
-                            allowed=set()#this code makes sure that we don't keep duplicates of a reciprocal hit
-                            kill_it=[]
-                            for tup in dummy_s:
-                                if tup[0] not in allowed or tup[1] not in allowed:
-                                    allowed.add(tup[0]);allowed.add(tup[1])
-                                else:
-                                    kill_it.append(tup)
-                            for tupk in kill_it:
-                                dummy_s.remove(tupk)
-                            #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
-                            length2=[(trip[0],trip[1]) for trip in dummy_s]
-                            '''for trip in dummy_top:
-                                length2.append((trip[0],trip[1]))'''
-                            l2hL+=[length2]
-                            newhits.add(length2)
-                            holesList+=[dummy_top]
-                    
-                    elif getInt(htsc[i-1][1])> getInt(htsc[i][1]) and getInt(htsc[i][1])> getInt(htsc[i+1][1]):#case: scafs in reverse order
-                        if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])>(getInt(htsc[i][1])+1):#if there is a hole on BOTH scafs
-                            indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
-                            indivcol2=set(range(getInt(htsc[i-1][1])-1),getInt(htsc[i][1]),-1)
-                            mycol=indivcol1.union(indivcol2)
-                            dummy=[]
-                            with open(en_pslout_file,'r') as en_pslout:
-                                for line in en_pslout:
-                                    line=line.rstrip().split()
-                                    if getInt(line[0]) in mycol and getInt(line[2]) in mycol and line[1]!=line[3]:
-                                        dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
-                            dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
-                            allowed=set()
-                            kill_it=[]
-                            for tup in dummy_s:
-                                if tup[0] not in allowed or tup[1] not in allowed:
-                                    allowed.add(tup[0]);allowed.add(tup[1])
-                                else:
-                                    kill_it.append(tup)
-                            for tupk in kill_it:
-                                dummy_s.remove(tupk)
-                            #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
-                            length2=[(trip[0],trip[1]) for trip in dummy_s]
-                            '''for trip in dummy_top:
-                                length2.append((trip[0],trip[1]))'''
-                            l2hL+=[length2]
-                            newhits.add(length2)
-                            holesList+=[dummy_top]
-                            
-        elif len(htsc)==2:
-            for i in range(1,2):
-                if getInt(htsc[i-1][0])< getInt(htsc[i][0]):
-                    if getInt(htsc[i-1][1])< getInt(htsc[i][1]):
-                        if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])<(getInt(htsc[i][1])-1):#if there is a hole on BOTH scafs
-        #there was a gap on the scaffold. now we want to fill it in.
-                            indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
-                            indivcol2=set(range(getInt(htsc[i-1][1])+1),getInt(htsc[i][1]))
-                            mycol=indivcol1.union(indivcol2)
-                            
-                            dummy=[]
-                            with open(en_pslout_file,'r') as en_pslout:
-                                for line in en_pslout:
-                                    line=line.rstrip().split()
-                                    if getInt(line[0]) in mycol and getInt(line[2]) in mycol and line[1]!=line[3]:
-                                        dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
-                            dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
-                            allowed=set()
-                            kill_it=[]
-                            for tup in dummy_s:
-                                if tup[0] not in allowed or tup[1] not in allowed:
-                                    allowed.add(tup[0]);allowed.add(tup[1])
-                                else:
-                                    kill_it.append(tup)
-                            for tupk in kill_it:
-                                dummy_s.remove(tupk)
-                            #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
-                            length2=[(trip[0],trip[1]) for trip in dummy_s]
-                            '''for trip in dummy_top:
-                                length2.append((trip[0],trip[1]))'''
-                            l2thhL+=[length2]
-                            newhits.add(length2)
-                            twohitsholesList+=[dummy_top]
-                    
-                    elif getInt(htsc[i-1][1])> getInt(htsc[i][1]) and getInt(htsc[i][1])> getInt(htsc[i+1][1]):#case: scafs in reverse order
-                        if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])>(getInt(htsc[i][1])+1):#if there is a hole on BOTH scafs
-                            indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
-                            indivcol2=set(range(getInt(htsc[i-1][1])-1),getInt(htsc[i][1]),-1)
-                            mycol=indivcol1.union(indivcol2)
-                            
-                            dummy=[]
-                            with open(en_pslout_file,'r') as en_pslout:
-                                for line in en_pslout:
-                                    line=line.rstrip().split()
-                                    if getInt(line[0]) in mycol and getInt(line[2]) in mycol and line[1]!=line[3]:
-                                        dummy.append((line[0],line[2],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
-                            dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
-                            allowed=set()
-                            kill_it=[]
-                            for tup in dummy_s:
-                                if tup[0] not in allowed or tup[1] not in allowed:
-                                    allowed.add(tup[0]);allowed.add(tup[1])
-                                else:
-                                    kill_it.append(tup)
-                            for tupk in kill_it:
-                                dummy_s.remove(tupk)
-                            #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
-                            length2=[(trip[0],trip[1]) for trip in dummy_s]
-                            '''for trip in dummy_top:
-                                length2.append((trip[0],trip[1]))'''
-                            l2thhL+=[length2]
-                            newhits.add(length2)
-                            twohitsholesList+=[dummy_top]  #i think this will make thhL a list of lists, one list for each sca-sca pair
-                            #which may be good, or bad, but it is easy to change
-                            #twohitsholesList+=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)[0:(min(len(indivcol1),len(indivcol2))+1)]
-        for t in newhits:
-            htsc+=[t]
-        htsc=sorted(htsc,key=lambda tup: (tup[0]))
+                                        if getInt(line[0]) in mycol and getInt(line[1]) in mycol and pbi[line[0]]!=pbi[line[1]]:
+                                            dummy.append((line[0],line[1],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
+                                dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
+                                allowed=set()
+                                kill_it=[]
+                                for tup in dummy_s:
+                                    if tup[0] not in allowed or tup[1] not in allowed:
+                                        allowed.add(tup[0]);allowed.add(tup[1])
+                                    else:
+                                        kill_it.append(tup)
+                                for tupk in kill_it:
+                                    dummy_s.remove(tupk)
+                                #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
+                                length2=[(trip[0],trip[1]) for trip in dummy_s]
+                                '''for trip in dummy_top:
+                                    length2.append((trip[0],trip[1]))'''
+                                l2thhL+=[length2]
+                                newhits.add(length2)
+                                twohitsholesList+=[dummy_top]
+                        
+                        elif getInt(htsc[i-1][1])> getInt(htsc[i][1]) and getInt(htsc[i][1])> getInt(htsc[i+1][1]):#case: scafs in reverse order
+                            if getInt(htsc[i-1][0])<(getInt(htsc[i][0])-1) and getInt(htsc[i-1][1])>(getInt(htsc[i][1])+1):#if there is a hole on BOTH scafs
+                                indivcol1=set(range(getInt(htsc[i-1][0])+1),getInt(htsc[i][0]))
+                                indivcol2=set(range(getInt(htsc[i-1][1])-1),getInt(htsc[i][1]),-1)
+                                mycol=indivcol1.union(indivcol2)
+                                
+                                dummy=[]
+                                with open(en_pslout_file,'r') as en_pslout:
+                                    for line in en_pslout:
+                                        if getInt(line[0]) in mycol and getInt(line[1]) in mycol and pbi[line[0]]!=pbi[line[1]]:#line[1]!=line[3]:
+                                            dummy.append((line[0],line[1],(float(line[-3]),float(line[-2]))))#we now have a tuple with the ohnologan, & its bitscore&ev
+                                dummy_s=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)
+                                allowed=set()
+                                kill_it=[]
+                                for tup in dummy_s:
+                                    if tup[0] not in allowed or tup[1] not in allowed:
+                                        allowed.add(tup[0]);allowed.add(tup[1])
+                                    else:
+                                        kill_it.append(tup)
+                                for tupk in kill_it:
+                                    dummy_s.remove(tupk)
+                                #dummy_top=dummy_s[0:(max(len(indivcol1),len(indivcol2))+1)]
+                                length2=[(trip[0],trip[1]) for trip in dummy_s]
+                                '''for trip in dummy_top:
+                                    length2.append((trip[0],trip[1]))'''
+                                l2thhL+=[length2]
+                                newhits.add(length2)
+                                twohitsholesList+=[dummy_top]  #i think this will make thhL a list of lists, one list for each sca-sca pair
+                                #which may be good, or bad, but it is easy to change
+                                #twohitsholesList+=sorted(dummy,key=lambda tup:(tup[2][0]),reverse=True)[0:(min(len(indivcol1),len(indivcol2))+1)]
+            for t in newhits:
+                htsc+=[t]
+            htsc=sorted(htsc,key=lambda tup: (tup[0]))
     return holesList, l2hL, twohitsholesList, l2thhL, htscList 
 
 def printht(htsc):
@@ -380,7 +385,6 @@ def getDistrib(lst,diPL):
             d.append(t)
             seen.append((k,v))
     return d            
-
 #Read in and update the psl output and find hits
 def readpsl(pslout,pbidict):
     bhits=[]
@@ -394,7 +398,6 @@ def readpsl(pslout,pbidict):
             line=line.rstrip().split()
             ov=max([ int(i) for i in re.split(r'(\d+)',line[-1]) if len(i)>0 and i.isdigit()])
             if float(line[4])>40.0 and ov/min(float(line[5]),float(line[6]))>=0.12:
-
                 if line[0]!=line[2]:
                     if line[1] not in hits.keys():
                         hits[line[1]]=[line[3]]
@@ -441,9 +444,7 @@ def readpsl(pslout,pbidict):
             except:
                 score2=10
             score=score1+score2
-            
             bhits.append((k1,k2,score))
-
     ghits=collections.OrderedDict()
     for p1 in phits.keys():
         minval=min([float(phits[p1][p2]) for p2 in phits[p1].keys()])
@@ -460,12 +461,8 @@ def readpsl(pslout,pbidict):
             if float(phits[p1][p2])==minval and check==0:
                 print p1,p2
                 check=1
-
     betterHits=collections.OrderedDict()
     pairs=[]
-#    scaffolds_score=sorted(bhits.items(),key=lambda kv: kv[1], reverse=True)
-#    for k in bhits:
-#        print k, bhits[k]
     return 
     for g in ghits.keys():
         score=15.0
@@ -478,57 +475,17 @@ def readpsl(pslout,pbidict):
             if hits[pbidict[g]][pbidict[g2]]<score:
                 bh=g2
                 score=hits[pbidict[g]][pbidict[g2]]
-        #print 'Best Hit: ',g,bh, Scaffolds: ,pbidict[g],pbidict[bh]
-#        print g,bh, 'Scaffolds: ',pbidict[g],pbidict[bh]
         pairs.append((g,bh))
-#        print '          ',pbidict[g],pbidict[bh]
         if pbidict[bh] not in betterHits[pbidict[g]].keys():
             betterHits[pbidict[g]][pbidict[bh]]=[(g,bh)]
         else:
             betterHits[pbidict[g]][pbidict[bh]].append((g,bh))
- #       return
     getCts(pairs)
    # print getDistrib(pairs,Lengthprot) 
     for k in betterHits.keys():
         for g in betterHits[k].keys():
-        #for g in ghits[k].keys():
             htsc=sorted(betterHits[k][g],key=lambda tup: (tup[0]))
             gh=[]
-#            print k,g#,'\n'
-            #print htsc
-            '''
-            s1=[i[0] for i in htsc]
-            s2=[i[1] for i in htsc]
-            if len(htsc)==len(set(s1)) and len(htsc)==len(set(s2)):
-               # print len(htsc), len(set(s1)), len(set(s2))
-                #print ' '.join(list(htsc))
-                #prTp(htsc)
-           #     print 'case 1'
-                printht(htsc)
-                #getscaf(htsc)
-               # continue
-               # if len(set(s1))==1 and len(set(s2))==1:
-               #     print 'singleton: ', htsc 
-               # if len(set(s1))==2 and len(set(s2))==2:
-               #     print ' duo: ', htsc
-            elif len(htsc)!=len(set(s1)) and len(htsc)!=len(set(s2)):
-            #    print 'case 2'
-                getdupboth(htsc)
-                
-            else:
-                if len(htsc)==len(set(s1)):
-             #       print 'case 3'
-                    getdup2(htsc)
-                elif len(htsc)==len(set(s2)):
-              #      print 'case 4'
-                    getdup1(htsc)
-                #print len(htsc), len(set(s1)), len(set(s2))
-                #print htsc
-               '''
-#                    print sorted(betterHits[k][g],key=lambda tup: (tup[0]))
-#            print betterHits[g][k]
-    #return
-#    return sorted(bhits, key=lambda tup: (tup[2]) )#bhits
 
 ## get scaffolds dictionary
 def readScaf(psl):
