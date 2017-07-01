@@ -61,10 +61,10 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
             with open(gff,'r') as gfile:
                 for line in gfile:
                     if k in re.split('\W+',line[8]):
-                        klen+=float((math.fabs(line[4] - line[3])))
+                        klen+=float((math.fabs(float(line[4]) - float(line[3]))))
                     for v in doublesD[k]:
                         if v in re.split('\W+',line[8]):
-                            vlentot+=float((math.fabs(line[4] - line[3])))
+                            vlentot+=float((math.fabs(float(line[4]) - float(line[3]))))
             if klen/vlentot > 1.5:
                 casesL+=[(k,doublesD[k],"tandem duplication")]
             else:
