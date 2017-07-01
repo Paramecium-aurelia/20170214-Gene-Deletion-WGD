@@ -28,18 +28,18 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
 #best mate to form the ohnologan
     bestmultL=[]; noscorebestmultL=[]; doublesD=dict(); casesL=[]
     for htsc in htscList:
-        doubles0=[]; doubles1=[]; mult=set()
+        doubles0=[]; doubles1=[]; mult=set(); mult0=set(); mult1=set()
         for tup in htsc:
             if tup[0] not in doubles0:
                 doubles0+=[tup[0]]
             else:
-                mult.add(tup[0])
+                mult.add(tup[0]); mult0.add(tup[0)])
             if tup[1] not in doubles1:                
                 doubles1+=[tup[1]]
             else:
-                mult.add(tup[1])
+                mult.add(tup[1]); mult1.add(tup[1])
         for tup in htsc:
-            if tup[0] in mult:
+            if tup[0] in mult0:
                 if tup[0] not in doublesD.keys():
                     doublesD[tup[0]]=set()
                     doublesD[tup[0]].add(tup[1])
@@ -47,7 +47,7 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
                     doublesD[tup[0]].add(tup[1])
             else:
                 continue
-            if tup[1] in mult:
+            if tup[1] in mult1:
                 if tup[1] not in doublesD.keys():
                     doublesD[tup[1]]=set()
                     doublesD[tup[1]].add(tup[0])
@@ -88,23 +88,23 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
                 #delete the tuple from htsc---it was a tandem duplication or a split domain, so that isn't an ohnolog
                 #if we need to know which was the case, we also have a list somewhere saying that (t[0], t[1], t[2]) was one of those cases
                                     #where t[0] is 1 protein,t[1] is the set of other proteins in the gff that it hits, and t[2] is a string indicated which case
-def remove_ds_td_extras(htscList, nsbmL):#see comments above
+def remove_ds_td_extras(htscList, bmL):#see comments above
     singly=htscList.copy()
     for htsc in singly:
-        doubles0=[]; doubles1=[]; mult={}
+        doubles0=[]; doubles1=[]; mult=set(); mult0=set(); mult1=set()
         for tup in htsc:
             if tup[0] not in doubles0:
                 doubles0+=[tup[0]]
             else:
-                mult.add(tup[0])
+                mult0.add(tup[0])
             if tup[1] not in doubles1:
                 doubles1+=[tup[1]]
             else:
-                mult.add(tup[0])
+                mult1.add(tup[1])
         for tup in htsc:
             for p in tup:
                 if p in mult:
-                    if tup or (tup[1],tup[0]) in nsbmL:
+                    if tup or (tup[1],tup[0]) in bmL:
                         continue
                     else:
                         #################################################
