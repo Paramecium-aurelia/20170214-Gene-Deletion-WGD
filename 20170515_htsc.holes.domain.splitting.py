@@ -26,11 +26,9 @@ def getdup1(lst):
 def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit by multiple other proteins when we compare pairs
 #of scaffolds, we infer that there is a tandem duplication, or a domain splitting of one large protein, and choose a single
 #best mate to form the ohnologan
-    bestmultL=[]
-    noscorebestmultL=[]
-    casesL=[]
+    bestmultL=[]; noscorebestmultL=[]; doublesD=dict(); casesL=[]
     for htsc in htscList:
-        doubles0=[]; doubles1=[]; mult={}
+        doubles0=[]; doubles1=[]; mult=set()
         for tup in htsc:
             if tup[0] not in doubles0:
                 doubles0+=[tup[0]]
@@ -44,6 +42,7 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
             if tup[0] in mult:
                 if tup[0] not in doublesD.keys():
                     doublesD[tup[0]]=set()
+                    doublesD[tup[0]].add(tup[1])
                 else:
                     doublesD[tup[0]].add(tup[1])
             else:
@@ -51,11 +50,11 @@ def domainsplit_tandemdup_ohno(htscList,en_psl,gff):#if a single protein is hit 
             if tup[1] in mult:
                 if tup[1] not in doublesD.keys():
                     doublesD[tup[1]]=set()
+                    doublesD[tup[1]].add(tup[0])
                 else:
                     doublesD[tup[1]].add(tup[0])                
             else:
                 continue
-
         for k in doublesD.keys():
             klen=0
             vlentot=0
